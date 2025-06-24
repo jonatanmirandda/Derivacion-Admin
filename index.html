@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Soporte WhatsApp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+    button {
+      background-color: #25d366;
+      color: white;
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Contactanos por WhatsApp</h1>
+  <button onclick="redirigir()">Hablar por WhatsApp</button>
+
+  <script>
+    async function redirigir() {
+      try {
+        const res = await fetch('data.json');
+        const numeros = await res.json();
+
+        const habilitados = numeros.filter(n => n.habilitado);
+        if (habilitados.length === 0) {
+          alert("No hay números habilitados.");
+          return;
+        }
+
+        const indexKey = "ultimoNumeroIndex";
+        let index = parseInt(localStorage.getItem(indexKey)) || 0;
+
+        const elegido = habilitados[index % habilitados.length];
+        localStorage.setItem(indexKey, (index + 1) % habilitados.length);
+
+        const mensaje = encodeURIComponent("Hola, quiero un usuario");
+        window.location.href = `https://wa.me/${elegido.numero}?text=${mensaje}`;
+      } catch (err) {
+        alert("No se pudo cargar la lista de números.");
+        console.error(err);
+      }
+    }
+  </script>
+</body>
+</html>
