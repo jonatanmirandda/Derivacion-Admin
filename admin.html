@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin WhatsApp</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #fafafa;
+    }
+    table {
+      width: 100%%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+    td, th {
+      border: 1px solid #ccc;
+      padding: 0.5rem;
+    }
+    input[type='text'] {
+      width: 100%%;
+    }
+    button {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Administrar Números de WhatsApp</h1>
+  <table id="tabla">
+    <tr><th>Número</th><th>Habilitado</th><th>Eliminar</th></tr>
+  </table>
+  <button onclick="agregarFila()">Agregar Número</button>
+  <button onclick="descargar()">Descargar JSON</button>
+
+  <script>
+    let data = [];
+
+    async function cargar() {
+      const res = await fetch('public/data.json');
+      data = await res.json();
+      render();
+    }
+
+    function render() {
+      const tabla = document.getElementById('tabla');
+      tabla.innerHTML = "<tr><th>Número</th><th>Habilitado</th><th>Eliminar</th></tr>";
+      data.forEach((n, i) => {
+        tabla.innerHTML += `
+          <tr>
+            <td><input type='text' value='${n.numero}' onchange='actualizar(${i}, "numero", this.value)' /></td>
+            <td><input type='checkbox' ${n.habilitado ? "checked" : ""} onchange='actualizar(${i}, "habilitado", this.checked)' /></td>
+            <td><button onclick='eliminar(${i})'>❌</button></td>
+          </tr>
+        `;
+      });
+    }
+
+    function actualizar(i, campo, valor) {
+      data[i][campo] = campo === "habilitado" ? Boolean(valor) : valor;
+    }
+
+    function agregarFila() {
+      data.push({ numero: "", habilitado: true });
+      render();
+    }
+
+    function eliminar(i) {
+      data.splice(i, 1);
+      render();
+    }
+
+    function descargar() {
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "data.json";
+      a.click();
+    }
+
+    cargar();
+  </script>
+</body>
+</html>
